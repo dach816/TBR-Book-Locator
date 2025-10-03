@@ -1,5 +1,4 @@
 import integrations
-import os
 
 def test_everand_query(requests_mock):
     isbn = "0062802402"
@@ -115,7 +114,7 @@ def test_everand_links_found():
 
 def test_hardcover_data():
     # Get 1 good result
-    json = {"data": {"search": {"results": {"hits": [{"document": {"author_names": ["Author1, Author2"],"description": "Book description","has_audiobook": True,"has_ebook": True,"image": {"url": "image url"},"isbns": ["9781797113647","1534403019"],"pages": 496,"rating": 3.978260869565217,"release_date": "2018-01-01","slug": "hardcover-slug","title": "Book Title"}}]}}}}
+    json = {"data": {"search": {"results": {"hits": [{"document": {"author_names": ["Author1, Author2"],"description": "Book description","has_audiobook": True,"has_ebook": True,"image": {"url": "image url"},"isbns": ["9781797113647","1534403019"],"pages": 496,"rating": 3.978260869565217,"release_date": "2018-01-01","slug": "hardcover-slug","title": "Book Title", "id": "ID"}}]}}}}
     bookDetails = integrations.handle_hardcover_data(json)
     assert len(bookDetails) == 1
 
@@ -131,17 +130,17 @@ def test_hardcover_data():
     assert book.url == f"{integrations.hardcover_book_url}hardcover-slug"
 
     # Get 1 good result (has_ebook false)
-    json = {"data": {"search": {"results": {"hits": [{"document": {"author_names": ["Author1, Author2"],"description": "Book description","has_audiobook": True,"has_ebook": False,"image": {"url": "image url"},"isbns": ["9781797113647","1534403019"],"pages": 496,"rating": 3.978260869565217,"release_date": "2018-01-01","slug": "hardcover-slug","title": "Book Title"}}]}}}}
+    json = {"data": {"search": {"results": {"hits": [{"document": {"author_names": ["Author1, Author2"],"description": "Book description","has_audiobook": True,"has_ebook": False,"image": {"url": "image url"},"isbns": ["9781797113647","1534403019"],"pages": 496,"rating": 3.978260869565217,"release_date": "2018-01-01","slug": "hardcover-slug","title": "Book Title", "id": "ID"}}]}}}}
     bookDetails = integrations.handle_hardcover_data(json)
     assert len(bookDetails) == 1
 
     # Get 1 good result (has_audiobook false)
-    json = {"data": {"search": {"results": {"hits": [{"document": {"author_names": ["Author1, Author2"],"description": "Book description","has_audiobook": False,"has_ebook": True,"image": {"url": "image url"},"isbns": ["9781797113647","1534403019"],"pages": 496,"rating": 3.978260869565217,"release_date": "2018-01-01","slug": "hardcover-slug","title": "Book Title"}}]}}}}
+    json = {"data": {"search": {"results": {"hits": [{"document": {"author_names": ["Author1, Author2"],"description": "Book description","has_audiobook": False,"has_ebook": True,"image": {"url": "image url"},"isbns": ["9781797113647","1534403019"],"pages": 496,"rating": 3.978260869565217,"release_date": "2018-01-01","slug": "hardcover-slug","title": "Book Title", "id": "ID"}}]}}}}
     bookDetails = integrations.handle_hardcover_data(json)
     assert len(bookDetails) == 1
 
     # Get 1 bad result
-    json = {"data": {"search": {"results": {"hits": [{"document": {"author_names": ["Author1, Author2"],"description": "Book description","has_audiobook": False,"has_ebook": False,"image": {"url": "image url"},"isbns": ["9781797113647","1534403019"],"pages": 496,"rating": 3.978260869565217,"release_date": "2018-01-01","slug": "hardcover-slug","title": "Book Title"}}]}}}}
+    json = {"data": {"search": {"results": {"hits": [{"document": {"author_names": ["Author1, Author2"],"description": "Book description","has_audiobook": False,"has_ebook": False,"image": {"url": "image url"},"isbns": ["9781797113647","1534403019"],"pages": 496,"rating": 3.978260869565217,"release_date": "2018-01-01","slug": "hardcover-slug","title": "Book Title", "id": "ID"}}]}}}}
     bookDetails = integrations.handle_hardcover_data(json)
     assert len(bookDetails) == 0
 

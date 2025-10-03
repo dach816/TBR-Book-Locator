@@ -20,3 +20,4 @@ class BookDetails:
     releaseDate: datetime
     url: str
     pages: int
+    id: str

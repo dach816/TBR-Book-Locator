@@ -88,7 +88,8 @@ def handle_hardcover_data(data) -> list[BookDetails]:
         releaseDate = document["release_date"] if "release_date" in document else None
         url = f"{hardcover_book_url}{document["slug"]}" if "slug" in document else None
         pages = document["pages"] if "pages" in document else None
-        bookDetails = BookDetails(title, authors, coverImageUrl, isbns, rating, description, releaseDate, url, pages)
+        id = document["id"] if "id" in document else None
+        bookDetails = BookDetails(title, authors, coverImageUrl, isbns, rating, description, releaseDate, url, pages, id)
         results.append(bookDetails)
 
     print(results)
