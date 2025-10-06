@@ -81,7 +81,7 @@ def handle_hardcover_data(data) -> list[BookDetails]:
 
         title = document["title"] if "title" in document else None
         authors = ", ".join(document["author_names"]) if "author_names" in document else None
-        coverImageUrl = document["image"]["url"] if "image" in document else None
+        coverImageUrl = document["image"]["url"] if "image" in document and "url" in document["image"] else None
         isbns = document["isbns"] if "isbns" in document else None
         rating = document["rating"] if "rating" in document else None
         description = document["description"] if "description" in document else None
