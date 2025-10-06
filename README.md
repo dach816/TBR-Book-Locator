@@ -1,16 +1,13 @@
-# React + Vite
+# TBR Book Locator
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A website that lets you search books, check their availability on [Everand](https://www.everand.com/), and add them to a to be read (TBR) list on [Hardcover](https://hardcover.app/).
 
-Currently, two official plugins are available:
+## How it works
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+**Tech used:** React, Flask, Bootstrap, Vite
 
-## React Compiler
+The search uses the [Hardcover GraphQL API](https://docs.hardcover.app/api/getting-started/) to query books by title and/or author.
 
-The React Compiler is not enabled on this template. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+After getting the search results back, there will be an option to check if any ebooks or audiobooks are available to read on Everand. This works by searching the ISBNs returned from the Hardcover API on Everand. The TBR Book Locator will display if an ebook or an audiobook is available with links to each one in Everand.
 
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+There will be an option to add a book to a Hardcover list. This is super useful if that book is unavailable on Everand but you still want to keep track of it.
