@@ -1,4 +1,4 @@
-import integrations
+from ..api import integrations
 
 def test_everand_query(requests_mock):
     isbn = "0062802402"
