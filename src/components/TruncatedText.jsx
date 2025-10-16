@@ -6,7 +6,7 @@ function TruncatedText({truncatedText, fullText}) {
     return (
         <>
             {!seeMore ? `${truncatedText}...` : fullText}
-            <Button variant="link" onClick={() => setSeeMore(!seeMore)}>see {seeMore ? 'less' : 'more'}</Button>
+            <Button variant="link" className="pt-0 pb-1 border border-0" onClick={() => setSeeMore(!seeMore)}>see {seeMore ? 'less' : 'more'}</Button>
         </>
     )
 }

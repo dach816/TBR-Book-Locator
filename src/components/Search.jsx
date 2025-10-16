@@ -4,10 +4,14 @@ import SearchResults from "./SearchResults";
 import Loading from './Loading';
 
 function Search() {
-  const [resultsJson, setResultsJson] = useState([])
-  const [loading, setLoading] = useState(false)
+    const [resultsJson, setResultsJson] = useState(null)
+    const [loading, setLoading] = useState(false)
 
     const onSearch = (query) => {
+        if (!query) {
+            return
+        }
+
         // Add error handling
         setLoading(true)
         fetch(`/api/query/hardcover?query=${query}`).then(res => res.json()).then(data => {
@@ -19,7 +23,7 @@ function Search() {
     return (
         <>
             <SearchForm onSearch={onSearch} />
-            {loading ? <Loading /> : <SearchResults resultList={resultsJson} />}
+            {resultsJson && (loading ? <Loading /> : <SearchResults resultList={resultsJson} />)}
         </>
     )
 }
