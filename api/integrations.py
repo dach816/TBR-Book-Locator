@@ -3,6 +3,20 @@ from book_info import BookLinks, BookDetails
 
 everand_query_url = "https://www.everand.com/search/query"
 
+def query_everand_isbns(isbns: list[str]) -> BookLinks:
+    results = map(query_everand, isbns)
+    filteredResults = filter(lambda r: r is not None, results)
+    bookLinks = BookLinks(False, False, [], [])
+    for result in filteredResults:
+        bookLinks.audiobookLinks.extend(result.audiobookLinks)
+        bookLinks.ebookLinks.extend(result.ebookLinks)
+    
+    bookLinks.audiobookLinks = list(set(bookLinks.audiobookLinks))
+    bookLinks.ebookLinks = list(set(bookLinks.ebookLinks))
+    bookLinks.hasAudiobook = len(bookLinks.audiobookLinks) > 0
+    bookLinks.hasEbook = len(bookLinks.ebookLinks) > 0
+    return bookLinks
+
 def query_everand(query: str) -> BookLinks:
     response = requests.get(everand_query_url, params={"query": query})
     response.raise_for_status()

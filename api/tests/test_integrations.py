@@ -43,6 +43,61 @@ class Test_Everand:
         assert bookInfo.audiobookLinks == ["url"]
         assert len(bookInfo.ebookLinks) == 0
 
+    def test_everand_query_isbns_one_audiobook_one_ebook(self, requests_mock):
+        isbn1 = "9781980080633"
+        isbn2 = "9781250765383"
+        requests_mock.get(f"{integrations.everand_query_url}?query={isbn1}", json=self.audiobookResultsOneLink)
+        requests_mock.get(f"{integrations.everand_query_url}?query={isbn2}", json=self.ebookResultsOneLink)
+        bookInfo = integrations.query_everand_isbns([isbn1, isbn2])
+        assert bookInfo.hasAudiobook == True
+        assert bookInfo.hasEbook == True
+        assert bookInfo.audiobookLinks == ["url"]
+        assert bookInfo.ebookLinks == ["url"]
+
+    def test_everand_query_isbns_no_audiobook_one_ebook(self, requests_mock):
+        isbn1 = "6258327583"
+        isbn2 = "9781250765383"
+        requests_mock.get(f"{integrations.everand_query_url}?query={isbn1}", json=self.noResults)
+        requests_mock.get(f"{integrations.everand_query_url}?query={isbn2}", json=self.ebookResultsOneLink)
+        bookInfo = integrations.query_everand_isbns([isbn1, isbn2])
+        assert bookInfo.hasAudiobook == False
+        assert bookInfo.hasEbook == True
+        assert len(bookInfo.audiobookLinks) == 0
+        assert bookInfo.ebookLinks == ["url"]
+
+    def test_everand_query_isbns_no_audiobook_two_ebook(self, requests_mock):
+        isbn1 = "9781250880796"
+        isbn2 = "9781250765383"
+        requests_mock.get(f"{integrations.everand_query_url}?query={isbn1}", json=self.ebookResultsOneLink)
+        requests_mock.get(f"{integrations.everand_query_url}?query={isbn2}", json=self.ebookResultsOneLink)
+        bookInfo = integrations.query_everand_isbns([isbn1, isbn2])
+        assert bookInfo.hasAudiobook == False
+        assert bookInfo.hasEbook == True
+        assert len(bookInfo.audiobookLinks) == 0
+        assert bookInfo.ebookLinks == ["url"]
+
+    def test_everand_query_isbns_one_audiobook_no_ebook(self, requests_mock):
+        isbn1 = "9781980080633"
+        isbn2 = "6258327583"
+        requests_mock.get(f"{integrations.everand_query_url}?query={isbn1}", json=self.audiobookResultsOneLink)
+        requests_mock.get(f"{integrations.everand_query_url}?query={isbn2}", json=self.noResults)
+        bookInfo = integrations.query_everand_isbns([isbn1, isbn2])
+        assert bookInfo.hasAudiobook == True
+        assert bookInfo.hasEbook == False
+        assert bookInfo.audiobookLinks == ["url"]
+        assert len(bookInfo.ebookLinks) == 0
+
+    def test_everand_query_isbns_two_audiobook_no_ebook(self, requests_mock):
+        isbn1 = "9781980080633"
+        isbn2 = "1980080631"
+        requests_mock.get(f"{integrations.everand_query_url}?query={isbn1}", json=self.audiobookResultsOneLink)
+        requests_mock.get(f"{integrations.everand_query_url}?query={isbn2}", json=self.audiobookResultsOneLink)
+        bookInfo = integrations.query_everand_isbns([isbn1, isbn2])
+        assert bookInfo.hasAudiobook == True
+        assert bookInfo.hasEbook == False
+        assert bookInfo.audiobookLinks == ["url"]
+        assert len(bookInfo.ebookLinks) == 0
+
     def test_everand_data_audiobook_one_link(self):
         bookInfo = integrations.handle_everand_data(self.audiobookResultsOneLink)
         assert bookInfo.hasAudiobook == True

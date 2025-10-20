@@ -8,17 +8,18 @@ load_dotenv()
 
 app = Flask(__name__)
 
-@app.route('/api/time')
-def get_current_time():
-    return {'time': time.time()}
+@app.route('/api/query/everand', methods=['POST'])
+def get_everand_books():
+    data = request.json
+    if not data:
+        abort(400, description="No data")
 
-@app.route('/api/query/everand')
-def get_everand_books(query):
-    if not query:
-        return
-
+    isbns = data.get("isbns")
+    if not isbns:
+        abort(400, description="No ISBNs")
+    
     try:
-        return integrations.query_everand(query)
+        return integrations.query_everand_isbns(isbns)
     except Exception as e:
         abort(500, description=e)
 
@@ -37,3 +38,8 @@ def search_hardcover():
 def handle_generic_exception(error):
     response = jsonify({'message': error.description})
     return response, 500
+
+@app.errorhandler(400)
+def handle_user_exception(error):
+    response = jsonify({'message': error.description})
+    return response, 400
