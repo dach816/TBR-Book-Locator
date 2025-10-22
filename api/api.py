@@ -1,4 +1,5 @@
-import time
+import json
+from dataclasses import asdict
 import integrations
 from flask import Flask, abort, jsonify, request
 from dotenv import load_dotenv
@@ -19,7 +20,9 @@ def get_everand_books():
         abort(400, description="No ISBNs")
     
     try:
-        return integrations.query_everand_isbns(isbns)
+        results = json.dumps(asdict(integrations.query_everand_isbns(isbns)))
+        print(results)
+        return results
     except Exception as e:
         abort(500, description=e)
 

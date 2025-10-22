@@ -1,20 +1,19 @@
 import requests
-from book_info import BookLinks, BookDetails
+from book_info import BookLinks, BookDetails, BookLink
 
 everand_query_url = "https://www.everand.com/search/query"
 
 def query_everand_isbns(isbns: list[str]) -> BookLinks:
     results = map(query_everand, isbns)
     filteredResults = filter(lambda r: r is not None, results)
-    bookLinks = BookLinks(False, False, [], [])
+    bookLinks = BookLinks([], [])
     for result in filteredResults:
         bookLinks.audiobookLinks.extend(result.audiobookLinks)
         bookLinks.ebookLinks.extend(result.ebookLinks)
     
-    bookLinks.audiobookLinks = list(set(bookLinks.audiobookLinks))
-    bookLinks.ebookLinks = list(set(bookLinks.ebookLinks))
-    bookLinks.hasAudiobook = len(bookLinks.audiobookLinks) > 0
-    bookLinks.hasEbook = len(bookLinks.ebookLinks) > 0
+
+    bookLinks.audiobookLinks = unique_list_by_id(bookLinks.audiobookLinks)
+    bookLinks.ebookLinks = unique_list_by_id(bookLinks.ebookLinks)
     return bookLinks
 
 def query_everand(query: str) -> BookLinks:
@@ -31,13 +30,10 @@ def handle_everand_data(data) -> BookLinks:
 
     results = data["results"]
     audiobookLinks = get_everand_book_links(results, "audiobooks")
-    hasAudiobook = len(audiobookLinks) > 0
-
     ebookLinks = get_everand_book_links(results, "books")
-    hasEbook = len(ebookLinks) > 0
-    return BookLinks(hasAudiobook, hasEbook, audiobookLinks, ebookLinks)
+    return BookLinks(audiobookLinks, ebookLinks)
 
-def get_everand_book_links(results, bookType: str) -> list[str]:
+def get_everand_book_links(results, bookType: str) -> list[BookLink]:
     if bookType not in results:
         return []
 
@@ -55,8 +51,20 @@ def get_everand_book_links(results, bookType: str) -> list[str]:
 
     links = []
     for b in books:
-        if "book_preview_url" in b and b["book_preview_url"]:
-            links.append(b["book_preview_url"])
+        if not ("id" in b and b["id"]):
+            continue
+
+        if not ("book_preview_url" in b and b["book_preview_url"]):
+            continue
+
+        bookLink = BookLink(b["id"], None, None, b["book_preview_url"])
+        if "image_url" in b and b["image_url"]:
+            bookLink.coverImageUrl = b["image_url"]
+
+        if "title" in b and b["title"]:
+            bookLink.title = b["title"]
+
+        links.append(bookLink)
 
     return links
 
@@ -108,3 +116,17 @@ def handle_hardcover_data(data) -> list[BookDetails]:
 
     print(results)
     return results
+
+def unique_list_by_id(list):
+    if not list:
+        return list
+
+    seen = set()
+    uniqueList = []
+    for x in list:
+        key = x.id
+        if key not in seen:
+            seen.add(key)
+            uniqueList.append(x)
+
+    return uniqueList

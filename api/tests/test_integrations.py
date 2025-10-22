@@ -1,22 +1,25 @@
 import sys
 import os
 import pytest
+import copy
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 import integrations
+from book_info import BookLink
 
 class Test_Everand:
     def setup_method(self):
         AUDIOBOOK = "audiobooks"
         EBOOK = "books"
-        bookLink = {"book_preview_url":"url"}
-        noneBookLink = {"book_preview_url":None}
+        bookLink = {"book_preview_url":"url", "id": 1, "title": "title", "image_url": "image url"}
+        noneBookLink = {"book_preview_url":None, "id": 0}
 
         generateBooksByLinks = lambda bookType, links: {bookType:{"content":{"documents":links}}}
         generateBooks = lambda bookType, numLinks: generateBooksByLinks(bookType, [bookLink] * numLinks)
         generateResults = lambda bookType, numLinks: {"results":generateBooks(bookType, numLinks), "total_results_count":1}
 
+        self.bookLink = BookLink(1, "title", "image url", "url")
         self.audiobookResultsNoLinks = generateResults(AUDIOBOOK, 0)
         self.audiobookResultsOneLink = generateResults(AUDIOBOOK, 1)
         self.audiobookResultsTwoLinks = generateResults(AUDIOBOOK, 2)
@@ -38,9 +41,7 @@ class Test_Everand:
         isbn = "0062802402"
         requests_mock.get(f"{integrations.everand_query_url}?query={isbn}", json=self.audiobookResultsOneLink)
         bookInfo = integrations.query_everand(isbn)
-        assert bookInfo.hasAudiobook == True
-        assert bookInfo.hasEbook == False
-        assert bookInfo.audiobookLinks == ["url"]
+        assert bookInfo.audiobookLinks == [self.bookLink]
         assert len(bookInfo.ebookLinks) == 0
 
     def test_everand_query_isbns_one_audiobook_one_ebook(self, requests_mock):
@@ -49,10 +50,8 @@ class Test_Everand:
         requests_mock.get(f"{integrations.everand_query_url}?query={isbn1}", json=self.audiobookResultsOneLink)
         requests_mock.get(f"{integrations.everand_query_url}?query={isbn2}", json=self.ebookResultsOneLink)
         bookInfo = integrations.query_everand_isbns([isbn1, isbn2])
-        assert bookInfo.hasAudiobook == True
-        assert bookInfo.hasEbook == True
-        assert bookInfo.audiobookLinks == ["url"]
-        assert bookInfo.ebookLinks == ["url"]
+        assert bookInfo.audiobookLinks == [self.bookLink]
+        assert bookInfo.ebookLinks == [self.bookLink]
 
     def test_everand_query_isbns_no_audiobook_one_ebook(self, requests_mock):
         isbn1 = "6258327583"
@@ -60,10 +59,8 @@ class Test_Everand:
         requests_mock.get(f"{integrations.everand_query_url}?query={isbn1}", json=self.noResults)
         requests_mock.get(f"{integrations.everand_query_url}?query={isbn2}", json=self.ebookResultsOneLink)
         bookInfo = integrations.query_everand_isbns([isbn1, isbn2])
-        assert bookInfo.hasAudiobook == False
-        assert bookInfo.hasEbook == True
         assert len(bookInfo.audiobookLinks) == 0
-        assert bookInfo.ebookLinks == ["url"]
+        assert bookInfo.ebookLinks == [self.bookLink]
 
     def test_everand_query_isbns_no_audiobook_two_ebook(self, requests_mock):
         isbn1 = "9781250880796"
@@ -71,10 +68,8 @@ class Test_Everand:
         requests_mock.get(f"{integrations.everand_query_url}?query={isbn1}", json=self.ebookResultsOneLink)
         requests_mock.get(f"{integrations.everand_query_url}?query={isbn2}", json=self.ebookResultsOneLink)
         bookInfo = integrations.query_everand_isbns([isbn1, isbn2])
-        assert bookInfo.hasAudiobook == False
-        assert bookInfo.hasEbook == True
         assert len(bookInfo.audiobookLinks) == 0
-        assert bookInfo.ebookLinks == ["url"]
+        assert bookInfo.ebookLinks == [self.bookLink]
 
     def test_everand_query_isbns_one_audiobook_no_ebook(self, requests_mock):
         isbn1 = "9781980080633"
@@ -82,9 +77,7 @@ class Test_Everand:
         requests_mock.get(f"{integrations.everand_query_url}?query={isbn1}", json=self.audiobookResultsOneLink)
         requests_mock.get(f"{integrations.everand_query_url}?query={isbn2}", json=self.noResults)
         bookInfo = integrations.query_everand_isbns([isbn1, isbn2])
-        assert bookInfo.hasAudiobook == True
-        assert bookInfo.hasEbook == False
-        assert bookInfo.audiobookLinks == ["url"]
+        assert bookInfo.audiobookLinks == [self.bookLink]
         assert len(bookInfo.ebookLinks) == 0
 
     def test_everand_query_isbns_two_audiobook_no_ebook(self, requests_mock):
@@ -93,52 +86,38 @@ class Test_Everand:
         requests_mock.get(f"{integrations.everand_query_url}?query={isbn1}", json=self.audiobookResultsOneLink)
         requests_mock.get(f"{integrations.everand_query_url}?query={isbn2}", json=self.audiobookResultsOneLink)
         bookInfo = integrations.query_everand_isbns([isbn1, isbn2])
-        assert bookInfo.hasAudiobook == True
-        assert bookInfo.hasEbook == False
-        assert bookInfo.audiobookLinks == ["url"]
+        assert bookInfo.audiobookLinks == [self.bookLink]
         assert len(bookInfo.ebookLinks) == 0
 
     def test_everand_data_audiobook_one_link(self):
         bookInfo = integrations.handle_everand_data(self.audiobookResultsOneLink)
-        assert bookInfo.hasAudiobook == True
-        assert bookInfo.hasEbook == False
-        assert bookInfo.audiobookLinks == ["url"]
+        assert bookInfo.audiobookLinks == [self.bookLink]
         assert len(bookInfo.ebookLinks) == 0
 
     def test_everand_data_audiobook_no_links(self):
         bookInfo = integrations.handle_everand_data(self.audiobookResultsNoLinks)
-        assert bookInfo.hasAudiobook == False
-        assert bookInfo.hasEbook == False
         assert len(bookInfo.audiobookLinks) == 0
         assert len(bookInfo.ebookLinks) == 0
 
     def test_everand_data_audiobook_two_links(self):
         bookInfo = integrations.handle_everand_data(self.audiobookResultsTwoLinks)
-        assert bookInfo.hasAudiobook == True
-        assert bookInfo.hasEbook == False
-        assert bookInfo.audiobookLinks == ["url", "url"]
+        assert bookInfo.audiobookLinks == [self.bookLink, self.bookLink]
         assert len(bookInfo.ebookLinks) == 0
 
     def test_everand_data_ebook_one_link(self):
         bookInfo = integrations.handle_everand_data(self.ebookResultsOneLink)
-        assert bookInfo.hasAudiobook == False
-        assert bookInfo.hasEbook == True
         assert len(bookInfo.audiobookLinks) == 0
-        assert bookInfo.ebookLinks == ["url"]
+        assert bookInfo.ebookLinks == [self.bookLink]
 
     def test_everand_data_ebook_no_links(self):
         bookInfo = integrations.handle_everand_data(self.ebookResultsNoLinks)
-        assert bookInfo.hasAudiobook == False
-        assert bookInfo.hasEbook == False
         assert len(bookInfo.audiobookLinks) == 0
         assert len(bookInfo.ebookLinks) == 0
 
     def test_everand_data_ebook_two_links(self):
         bookInfo = integrations.handle_everand_data(self.ebookResultsTwoLinks)
-        assert bookInfo.hasAudiobook == False
-        assert bookInfo.hasEbook == True
         assert len(bookInfo.audiobookLinks) == 0
-        assert bookInfo.ebookLinks == ["url", "url"]
+        assert bookInfo.ebookLinks == [self.bookLink, self.bookLink]
 
     def test_everand_data_none(self):
         bookInfo = integrations.handle_everand_data(self.noResults)
@@ -170,15 +149,41 @@ class Test_Everand:
 
     def test_everand_links_found_one_link(self):
         links = integrations.get_everand_book_links(self.audiobookOneLink, "audiobooks")
-        assert links == ["url"]
+        assert links == [self.bookLink]
         
     def test_everand_links_found_two_links(self):
         links = integrations.get_everand_book_links(self.audiobookTwoLinks, "audiobooks")
-        assert links == ["url", "url"]
+        assert links == [self.bookLink, self.bookLink]
         
     def test_everand_links_found_two_links_one_none(self):
         links = integrations.get_everand_book_links(self.audiobookTwoLinksOneNone, "audiobooks")
-        assert links == ["url"]
+        assert links == [self.bookLink]
+        
+    def test_unique_list_none(self):
+        result = integrations.unique_list_by_id(None)
+        assert result == None
+
+    def test_unique_list_empty(self):
+        result = integrations.unique_list_by_id([])
+        assert result == []
+
+    def test_unique_list_one(self):
+        result = integrations.unique_list_by_id([self.bookLink])
+        assert result == [self.bookLink]
+
+    def test_unique_list_two(self):
+        otherBookLink = BookLink(123, "1", "2", "3")
+        result = integrations.unique_list_by_id([self.bookLink, otherBookLink])
+        assert result == [self.bookLink, otherBookLink]
+
+    def test_unique_list_two_same_id(self):
+        otherBookLink = BookLink(self.bookLink.id, "1", "2", "3")
+        result = integrations.unique_list_by_id([self.bookLink, otherBookLink])
+        assert result == [self.bookLink]
+
+    def test_unique_list_one_duplicate(self):
+        result = integrations.unique_list_by_id([self.bookLink, copy.copy(self.bookLink)])
+        assert result == [self.bookLink]
 
 class Test_Hardcover:
     def setup_method(self):

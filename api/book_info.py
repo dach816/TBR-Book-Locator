@@ -3,11 +3,16 @@ import datetime
 from decimal import Decimal
 
 @dataclass
+class BookLink:
+    id: str
+    title: str
+    coverImageUrl: str
+    url: str
+    
+@dataclass
 class BookLinks:
-    hasAudiobook: bool
-    hasEbook: bool
-    audiobookLinks: list[str]
-    ebookLinks: list[str]
+    audiobookLinks: list[BookLink]
+    ebookLinks: list[BookLink]
 
 @dataclass
 class BookDetails:
