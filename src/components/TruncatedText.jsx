@@ -3,6 +3,10 @@ import { Button } from "react-bootstrap";
 
 function TruncatedText({truncatedText, fullText}) {
     const [seeMore, setSeeMore] = useState(false);
+    if (!truncatedText) {
+        return <></>
+    }
+
     return (
         <>
             {!seeMore ? `${truncatedText}...` : fullText}

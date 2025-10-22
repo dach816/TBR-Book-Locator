@@ -23,7 +23,7 @@ function Search() {
     return (
         <>
             <SearchForm onSearch={onSearch} />
-            {resultsJson && (loading ? <Loading /> : <SearchResults resultList={resultsJson} />)}
+            {loading ? <Loading /> : resultsJson && <SearchResults resultList={resultsJson} />}
         </>
     )
 }
