@@ -3,6 +3,7 @@ import { Col, Row, Stack } from 'react-bootstrap';
 import Button from 'react-bootstrap/Button'
 import Form from 'react-bootstrap/Form'
 import { useSearchParams } from 'react-router-dom';
+import '../assets/StyledButton.css'
 
 function SearchForm({onSearch}) {
     const formRef = useRef(null);
@@ -39,7 +40,7 @@ function SearchForm({onSearch}) {
                                 placeholder="Search for a book title and/or author..."
                                 id="queryInput" onChange={(e) => setQuery(e.target.value)}
                                 value={query} />
-                            <Button variant="primary" type='submit'>Search</Button>
+                            <Button className='styled-button' type='submit'>Search</Button>
                         </Stack>
                     </Form>
                 </Col>

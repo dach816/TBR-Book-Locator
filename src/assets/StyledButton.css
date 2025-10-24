@@ -1,0 +1,9 @@
+.styled-button {
+  background-color: #2c204a;
+  border-color: gray;
+}
+
+.styled-button:hover {
+  background-color: #1c1332;
+  border-color: white;
+}

@@ -17,12 +17,16 @@ function BookResults({results, parentId}) {
 function BookAvailability({result, parentId}) {
 
     return (
-        <>
-            <Card.Title className="mt-3">Audiobooks</Card.Title>
-            <BookResults results={result.audiobookLinks} parentId={parentId}/>
-            <Card.Title className="mt-1">Ebooks</Card.Title>
-            <BookResults results={result.ebookLinks} parentId={parentId}/>
-        </>  
+        <Row className="mt-2">
+            <Col className="mt-1" xs={12} sm={6}>
+                <Card.Title>Audiobooks</Card.Title>
+                <BookResults results={result.audiobookLinks} parentId={parentId}/>
+            </Col>
+            <Col className="mt-1" xs={12} sm={6}>
+                <Card.Title>Ebooks</Card.Title>
+                <BookResults results={result.ebookLinks} parentId={parentId}/>
+            </Col>
+        </Row>  
     );
 }
 

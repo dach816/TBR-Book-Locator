@@ -3,18 +3,19 @@ import { Card, Col, Row, Button } from "react-bootstrap";
 import TruncatedText from "./TruncatedText";
 import BookAvailability from './BookAvailability';
 import Loading from './Loading';
+import '../assets/StyledButton.css'
 
 function SearchResult(props) {
     const [resultsJson, setResultsJson] = useState(null)
     const [loading, setLoading] = useState(false)
 
     const onSearch = (isbns) => {
-        if (!isbns) {
-            return
+        if (!isbns || isbns.length == 0) {
+            return;
         }
 
         // Add error handling
-        setLoading(true)
+        setLoading(true);
         const requestOptions = {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -23,7 +24,6 @@ function SearchResult(props) {
         fetch("/api/query/everand", requestOptions)
             .then(res => res.json())
             .then(data => {
-                console.log(data)
                 setLoading(false)
                 setResultsJson(data)
             })
@@ -54,8 +54,8 @@ function SearchResult(props) {
                     </Card.Text>
                 </Card.Body>
                 <Card.Footer style={{ textAlign: 'center' }}>
-                    <Button variant='primary' href={props.item.url} className='mx-1 mt-1'>Go to book in Hardcover <i className="bi bi-box-arrow-up-right"/></Button>
-                    <Button variant='primary' onClick={() => onSearch(props.item.isbns)} className='mx-1 mt-1'>Search Everand</Button>
+                    <Button href={props.item.url} className='mx-1 mt-1 styled-button'>Go to book in Hardcover <i className="bi bi-box-arrow-up-right"/></Button>
+                    <Button onClick={() => onSearch(props.item.isbns)} className='mx-1 mt-1 styled-button'>Search Everand</Button>
                     {loading ? <Loading /> : resultsJson && <BookAvailability result={resultsJson} parentId={props.item.id}/>}
                 </Card.Footer>
             </Card>
